@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root { font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; --icon-color:#765bd7; --card-icon-size:32px; --detail-icon-size:48px; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--ide-background); color:var(--ide-text); }
+button,input { font:inherit; }
+button { cursor:pointer; }
+header { position:sticky; top:0; z-index:5; padding:15px 13px 12px; background:var(--ide-background); border-bottom:1px solid var(--ide-border); }
+h1 { font-size:17px; margin:0 0 3px; }
+.sub { color:var(--ide-muted); font-size:12px; margin-bottom:12px; }
+.controls { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; }
+.field { position:relative; display:flex; flex-direction:column; gap:4px; min-width:0; }
+.field.search { grid-column:1/-1; }
+.field label { color:var(--ide-muted); font-size:11px; }
+input[type=search],input[type=text],.menu-trigger { width:100%; min-width:0; height:34px; padding:7px 9px; background:var(--ide-surface); color:var(--ide-text); border:1px solid var(--ide-border); border-radius:7px; }
+.menu-trigger { display:flex; align-items:center; justify-content:space-between; gap:7px; text-align:left; }
+.menu-trigger:hover,.menu-trigger[aria-expanded=true],input:focus { border-color:var(--icon-color); outline:none; }
+.menu-trigger .value { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.chevron { flex:none; color:var(--ide-muted); font-size:11px; }
+.color-chip { flex:none; width:18px; height:18px; border-radius:5px; background:var(--icon-color); border:1px solid var(--ide-border); }
+.popover { position:absolute; top:100%; left:0; z-index:10; margin-top:5px; min-width:100%; max-height:min(450px,70vh); overflow:auto; padding:5px; background:var(--ide-surface); color:var(--ide-text); border:1px solid var(--ide-border); border-radius:8px; box-shadow:0 8px 24px #0004; }
+.popover.right { left:auto; right:0; width:min(260px,calc(100vw - 26px)); }
+.menu-option { display:block; width:100%; min-height:30px; padding:6px 8px; text-align:left; background:transparent; color:var(--ide-text); border:0; border-radius:5px; }
+.menu-option:hover,.menu-option:focus { background:rgba(118,91,215,.18); outline:none; }
+.menu-option.active { color:var(--icon-color); font-weight:600; }
+#category-search { position:sticky; top:0; z-index:1; margin-bottom:5px; }
+.color-panel { padding:8px; }
+#color-canvas { display:block; width:100%; height:145px; border:1px solid var(--ide-border); border-radius:6px; cursor:crosshair; touch-action:none; margin-bottom:10px; }
+.palette { display:flex; gap:6px; margin-bottom:12px; }
+.swatch { width:22px; height:22px; padding:0; border-radius:50%; border:2px solid var(--ide-surface); box-shadow:0 0 0 1px var(--ide-border); }
+.swatch:hover,.swatch:focus { box-shadow:0 0 0 2px var(--ide-text); outline:none; }
+.color-panel label { display:flex; justify-content:space-between; margin:8px 0 3px; }
+.color-panel input[type=range] { display:block; width:100%; margin:0; accent-color:var(--icon-color); }
+.color-panel input[type=text] { height:32px; }
+#hue { appearance:none; height:12px; margin:7px 0 12px; border-radius:6px; background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00); }
+#hue::-webkit-slider-thumb { appearance:none; width:17px; height:17px; border:2px solid white; border-radius:50%; background:var(--icon-color); box-shadow:0 0 0 1px #444; }
+main { padding:12px; }
+.count { color:var(--ide-muted); font-size:12px; margin:1px 2px 9px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(91px,1fr)); gap:7px; }
+.card { min-width:0; padding:12px 4px 9px; text-align:center; border:1px solid var(--ide-border); border-radius:7px; background:var(--ide-surface); color:var(--ide-text); }
+.card:hover,.card:focus { outline:none; border-color:var(--icon-color); box-shadow:0 0 0 1px var(--icon-color); }
+.card.selected { border-color:var(--icon-color); background:rgba(118,91,215,.13); }
+.glyph { width:var(--card-icon-size); height:var(--card-icon-size); margin:0 auto 8px; color:var(--icon-color); }
+.glyph svg { width:100%; height:100%; }
+.label { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
+.pagination { display:flex; align-items:center; justify-content:space-between; gap:5px; margin:11px 0; }
+.pagination button { padding:6px 8px; border:1px solid var(--ide-border); border-radius:6px; background:var(--ide-surface); color:var(--ide-text); }
+.pagination button:hover:not(:disabled) { border-color:var(--icon-color); }
+.pagination button:disabled { opacity:.45; cursor:default; }
+.page-label { color:var(--ide-muted); white-space:nowrap; font-size:11px; }
+.detail { position:sticky; bottom:0; z-index:2; padding:12px 13px; background:var(--ide-background); border-top:1px solid var(--ide-border); box-shadow:0 -3px 12px #0002; }
+.detail-top { display:flex; align-items:center; gap:12px; }
+.detail .glyph { flex:none; width:var(--detail-icon-size); height:var(--detail-icon-size); margin:0; }
+.detail h2 { font-size:14px; margin:0 0 3px; }
+.detail p { margin:0; color:var(--ide-muted); font-size:11px; }
+.snippet { display:flex; gap:6px; margin-top:11px; }
+code { flex:1; min-width:0; padding:8px; overflow-x:auto; white-space:nowrap; background:var(--ide-surface); border:1px solid var(--ide-border); border-radius:6px; font-size:10px; }
+#copy { flex:none; padding:7px 10px; border:0; border-radius:6px; background:#765bd7; color:white; }
+</style></head><body>
+<header><h1>Tilt UI Icons</h1><div class="sub">537 icons · Theme follows RustRover</div>
+<div class="controls">
+  <div class="field search"><label for="search">Search</label><input id="search" type="search" placeholder="Find an icon or family" aria-label="Search icons"></div>
+  <div class="field popover-field"><label id="category-label">Category</label><button id="category-trigger" class="menu-trigger" type="button" aria-labelledby="category-label category-value" aria-haspopup="listbox" aria-expanded="false"><span id="category-value" class="value">All categories</span><span class="chevron">▾</span></button><div id="category-menu" class="popover" role="listbox" hidden><input id="category-search" type="search" placeholder="Filter categories" aria-label="Filter categories"><div id="category-options"></div></div></div>
+  <div class="field popover-field"><label id="size-label">Size</label><button id="size-trigger" class="menu-trigger" type="button" aria-labelledby="size-label size-value" aria-haspopup="listbox" aria-expanded="false"><span id="size-value" class="value">32 × 32</span><span class="chevron">▾</span></button><div id="size-menu" class="popover" role="listbox" hidden></div></div>
+  <div class="field popover-field"><label id="color-label">Icon color</label><button id="color-trigger" class="menu-trigger" type="button" aria-labelledby="color-label color-value" aria-haspopup="dialog" aria-expanded="false"><span class="color-chip"></span><span id="color-value" class="value">#765BD7</span><span class="chevron">▾</span></button><div id="color-menu" class="popover right color-panel" role="dialog" aria-label="Choose icon color" hidden><canvas id="color-canvas" width="232" height="145" aria-label="Choose saturation and brightness"></canvas><label for="hue">Hue <span id="hue-value">0°</span></label><input id="hue" type="range" min="0" max="360" value="0"><div class="palette" aria-label="Suggested icon colors"><button class="swatch" style="background:#765bd7" data-color="#765bd7" title="Violet"></button><button class="swatch" style="background:#6c8fe8" data-color="#6c8fe8" title="Blue"></button><button class="swatch" style="background:#39b7b4" data-color="#39b7b4" title="Teal"></button><button class="swatch" style="background:#ec827f" data-color="#ec827f" title="Coral"></button><button class="swatch" style="background:#e8b665" data-color="#e8b665" title="Gold"></button></div><label for="color-hex">Hex color</label><input id="color-hex" type="text" value="#765BD7" maxlength="7" spellcheck="false"><label for="red">Red <span id="red-value">118</span></label><input id="red" type="range" min="0" max="255" value="118"><label for="green">Green <span id="green-value">91</span></label><input id="green" type="range" min="0" max="255" value="91"><label for="blue">Blue <span id="blue-value">215</span></label><input id="blue" type="range" min="0" max="255" value="215"></div></div>
+</div></header>
+<main id="catalog-main"><div id="count" class="count"></div><nav class="pagination" aria-label="Icon pages"><button class="previous" type="button">Previous</button><span class="page-label"></span><button class="next" type="button">Next</button></nav><div id="grid" class="grid"></div><nav class="pagination" aria-label="Icon pages"><button class="previous" type="button">Previous</button><span class="page-label"></span><button class="next" type="button">Next</button></nav></main>
+<section id="detail" class="detail" hidden><div class="detail-top"><div id="preview" class="glyph"></div><div><h2 id="title"></h2><p id="description"></p></div></div><div class="snippet"><code id="snippet"></code><button id="copy" type="button">Copy</button></div></section>
+<script>
+const icons = __CATALOG__;
+const initialTheme = __IDE_THEME__;
+window.applyIdeTheme = function(theme) {
+  const root = document.documentElement;
+  root.style.colorScheme = theme.dark ? 'dark' : 'light';
+  root.style.setProperty('--ide-background',theme.background);
+  root.style.setProperty('--ide-surface',theme.surface);
+  root.style.setProperty('--ide-text',theme.text);
+  root.style.setProperty('--ide-muted',theme.muted);
+  root.style.setProperty('--ide-border',theme.border);
+};
+window.applyIdeTheme(initialTheme);
+const $ = id => document.getElementById(id);
+const search = $('search'), grid = $('grid'), count = $('count'), detail = $('detail');
+const menus = ['category','size','color'];
+const pageSize = 36;
+let categoryValue = '', iconSize = 32, page = 1, selected = null;
+const categories = [...new Map(icons.map(icon => [icon.category,icon.group])).entries()];
+function closeMenus() {
+  for (const id of menus) { $(id+'-menu').hidden = true; $(id+'-trigger').setAttribute('aria-expanded','false'); }
+}
+function toggleMenu(id) {
+  const opening = $(id+'-menu').hidden;
+  closeMenus();
+  if (opening) { $(id+'-menu').hidden = false; $(id+'-trigger').setAttribute('aria-expanded','true'); if (id === 'category') { $('category-search').value = ''; filterCategoryOptions(); $('category-search').focus(); } }
+}
+for (const id of menus) $(id+'-trigger').onclick = () => toggleMenu(id);
+document.addEventListener('pointerdown', event => { if (!event.target.closest('.popover-field')) closeMenus(); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenus(); });
+window.addEventListener('blur', closeMenus);
+function menuOption(label, active, onClick) {
+  const option = document.createElement('button'); option.type = 'button'; option.className = 'menu-option'+(active ? ' active' : ''); option.textContent = label;
+  option.setAttribute('role','option'); option.setAttribute('aria-selected',String(active)); option.onclick = onClick; return option;
+}
+function populateCategories() {
+  const options = $('category-options'); options.replaceChildren();
+  options.append(menuOption('All categories',categoryValue === '',() => chooseCategory('','All categories')));
+  for (const [key,label] of categories) options.append(menuOption(label,key === categoryValue,() => chooseCategory(key,label)));
+  filterCategoryOptions();
+}
+function filterCategoryOptions() {
+  const query = $('category-search').value.trim().toLowerCase();
+  for (const option of $('category-options').children) option.hidden = !!query && !option.textContent.toLowerCase().includes(query);
+}
+function chooseCategory(key,label) { categoryValue = key; $('category-value').textContent = label; page = 1; populateCategories(); closeMenus(); render(); }
+$('category-search').oninput = filterCategoryOptions;
+function populateSizes() {
+  const menu = $('size-menu'); menu.replaceChildren();
+  for (const value of [16,32,64]) menu.append(menuOption(value+' × '+value,value === iconSize,() => chooseSize(value)));
+}
+function chooseSize(value) {
+  iconSize = value; $('size-value').textContent = value+' × '+value;
+  document.documentElement.style.setProperty('--card-icon-size',value+'px');
+  document.documentElement.style.setProperty('--detail-icon-size',value+'px');
+  updateSnippet(); populateSizes(); closeMenus(); render();
+}
+let hue = 0, saturation = 1, brightness = 1, draggingCanvas = false;
+const colorCanvas = $('color-canvas');
+function hsvToRgb(h,s,v) {
+  const c = v*s, x = c*(1-Math.abs((h/60)%2-1)), m = v-c;
+  const channels = [[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][Math.floor(h/60)%6];
+  return channels.map(channel => Math.round((channel+m)*255));
+}
+function rgbToHsv(red,green,blue) {
+  const r = red/255, g = green/255, b = blue/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), difference = max-min;
+  let nextHue = hue;
+  if (difference) {
+    if (max === r) nextHue = 60*(((g-b)/difference+6)%6);
+    else if (max === g) nextHue = 60*((b-r)/difference+2);
+    else nextHue = 60*((r-g)/difference+4);
+  }
+  return [nextHue,max ? difference/max : 0,max];
+}
+function colorFromRgb(red,green,blue) {
+  return '#'+[red,green,blue].map(channel => Math.round(channel).toString(16).padStart(2,'0')).join('');
+}
+function drawColorCanvas() {
+  const context = colorCanvas.getContext('2d');
+  if (!context) return;
+  const width = colorCanvas.width, height = colorCanvas.height;
+  context.fillStyle = 'hsl('+hue+',100%,50%)'; context.fillRect(0,0,width,height);
+  const white = context.createLinearGradient(0,0,width,0);
+  white.addColorStop(0,'#fff'); white.addColorStop(1,'rgba(255,255,255,0)');
+  context.fillStyle = white; context.fillRect(0,0,width,height);
+  const black = context.createLinearGradient(0,0,0,height);
+  black.addColorStop(0,'rgba(0,0,0,0)'); black.addColorStop(1,'#000');
+  context.fillStyle = black; context.fillRect(0,0,width,height);
+  context.beginPath(); context.arc(saturation*width,(1-brightness)*height,6,0,2*Math.PI);
+  context.lineWidth = 4; context.strokeStyle = '#222'; context.stroke();
+  context.lineWidth = 2; context.strokeStyle = '#fff'; context.stroke();
+}
+function applyColor(hex) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return;
+  const normalized = hex.toUpperCase();
+  document.documentElement.style.setProperty('--icon-color',normalized);
+  $('color-value').textContent = normalized; $('color-hex').value = normalized;
+  const channels = [];
+  for (const [index,id] of ['red','green','blue'].entries()) {
+    const value = parseInt(normalized.slice(1+index*2,3+index*2),16);
+    channels.push(value);
+    $(id).value = value; $(id+'-value').textContent = value;
+  }
+  [hue,saturation,brightness] = rgbToHsv(...channels);
+  $('hue').value = Math.round(hue); $('hue-value').textContent = Math.round(hue)+'°';
+  drawColorCanvas();
+}
+$('color-hex').oninput = () => applyColor($('color-hex').value);
+for (const id of ['red','green','blue']) $(id).oninput = () => {
+  applyColor(colorFromRgb(...['red','green','blue'].map(channel => Number($(channel).value))));
+};
+$('hue').oninput = () => {
+  hue = Number($('hue').value);
+  applyColor(colorFromRgb(...hsvToRgb(hue,saturation,brightness)));
+};
+function pickCanvasColor(event) {
+  const bounds = colorCanvas.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
+  saturation = Math.max(0,Math.min(1,(event.clientX-bounds.left)/bounds.width));
+  brightness = 1-Math.max(0,Math.min(1,(event.clientY-bounds.top)/bounds.height));
+  applyColor(colorFromRgb(...hsvToRgb(hue,saturation,brightness)));
+}
+colorCanvas.addEventListener('pointerdown', event => {
+  draggingCanvas = true; event.preventDefault(); pickCanvasColor(event);
+});
+colorCanvas.addEventListener('pointermove', event => { if (draggingCanvas) pickCanvasColor(event); });
+window.addEventListener('pointerup', () => { draggingCanvas = false; });
+window.addEventListener('pointercancel', () => { draggingCanvas = false; });
+for (const swatch of document.querySelectorAll('.swatch')) swatch.onclick = () => { applyColor(swatch.dataset.color); closeMenus(); };
+function filtered() {
+  const words = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  return icons.filter(icon => (!categoryValue || icon.category === categoryValue) && words.every(word =>
+    (icon.name+' '+icon.group+' '+icon.description).toLowerCase().includes(word)));
+}
+function updateSnippet() { if (selected) $('snippet').textContent = '<icon name="'+selected+'" size="'+iconSize+'"></icon>'; }
+function select(icon) {
+  selected = icon.name; detail.hidden = false;
+  $('preview').innerHTML = icon.svg; $('title').textContent = icon.name;
+  $('description').textContent = icon.group+' · '+icon.description;
+  updateSnippet(); render();
+}
+function render() {
+  const entries = filtered(), pages = Math.max(1,Math.ceil(entries.length/pageSize));
+  page = Math.min(Math.max(1,page),pages);
+  count.textContent = entries.length+' icons'; grid.replaceChildren();
+  for (const icon of entries.slice((page-1)*pageSize,page*pageSize)) {
+    const card = document.createElement('button'); card.type = 'button'; card.className = 'card'+(selected === icon.name ? ' selected' : ''); card.title = icon.name+' · '+icon.group;
+    const preview = document.createElement('div'); preview.className = 'glyph'; preview.innerHTML = icon.svg;
+    const label = document.createElement('span'); label.className = 'label'; label.textContent = icon.name;
+    card.append(preview,label); card.onclick = () => select(icon); grid.append(card);
+  }
+  for (const item of document.querySelectorAll('.page-label')) item.textContent = 'Page '+page+' of '+pages;
+  for (const button of document.querySelectorAll('.previous')) button.disabled = page <= 1;
+  for (const button of document.querySelectorAll('.next')) button.disabled = page >= pages;
+}
+function changePage(delta) {
+  page += delta; render();
+  const top = $('catalog-main').getBoundingClientRect().top+window.scrollY-document.querySelector('header').offsetHeight;
+  window.scrollTo({top:Math.max(0,top),behavior:'auto'});
+}
+for (const button of document.querySelectorAll('.previous')) button.onclick = () => changePage(-1);
+for (const button of document.querySelectorAll('.next')) button.onclick = () => changePage(1);
+search.oninput = () => { page = 1; render(); };
+$('copy').onclick = () => {
+  const snippet = $('snippet').textContent;
+  __COPY_CALLBACK__;
+  const button = $('copy'); button.textContent = 'Copied'; setTimeout(() => button.textContent = 'Copy',1500);
+};
+populateCategories(); populateSizes(); applyColor('#765bd7'); render();
+</script></body></html>

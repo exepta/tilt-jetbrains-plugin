@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij.platform' version '2.19.0'
+}
+
+group = 'com.tiltus'
+version = '0.1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+repositories {
+    mavenCentral()
+    intellijPlatform { defaultRepositories() }
+}
+
+dependencies {
+    implementation 'org.jsoup:jsoup:1.22.1'
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'org.commonmark:commonmark:0.27.1'
+    implementation 'org.commonmark:commonmark-ext-gfm-tables:0.27.1'
+    implementation 'org.commonmark:commonmark-ext-gfm-strikethrough:0.27.1'
+    intellijPlatform {
+        local '/Users/exepta/Applications/RustRover.app'
+        bundledPlugin 'com.intellij.modules.jcef'
+        bundledPlugin 'com.jetbrains.rust'
+        testFramework org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform.INSTANCE
+    }
+    testImplementation platform('org.junit:junit-bom:6.0.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.vintage:junit-vintage-engine'
+    testImplementation 'junit:junit:4.13.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach { options.release = 25 }
+
+processResources {
+    from('/Users/exepta/RustroverProjects/tiltus/tilt-ui/crates') {
+        include '*/README.md'
+        into 'tilt-readmes'
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        name = 'Bevy Project Wizard'
+        version = project.version
+        ideaVersion { sinceBuild = '262' }
+    }
+}
+
+test {
+    useJUnitPlatform { excludeTags 'release-validation' }
+}
+
+tasks.register('validateGeneratedProjects', Test) {
+    group = 'verification'
+    description = 'Checks published TiltUI metadata and Cargo builds for generated desktop and installed WASM targets.'
+    testClassesDirs = test.testClassesDirs
+    classpath = test.classpath
+    useJUnitPlatform { includeTags 'release-validation' }
+}

@@ -1,0 +1,69 @@
+<idea-plugin>
+    <id>com.tiltus.bevywizard</id>
+    <name>Bevy Project Wizard</name>
+    <vendor>tilt-us</vendor>
+    <description>Creates Bevy and TiltUI projects from RustRover.</description>
+    <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="xml-support.xml">com.intellij.xml</depends>
+    <depends>com.intellij.modules.jcef</depends>
+    <depends>com.jetbrains.rust</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <directoryProjectGenerator implementation="com.tiltus.bevywizard.project.BevyProjectGenerator"/>
+        <localInspection groupName="TiltUI" displayName="TiltUI project setup" shortName="TiltProjectSetup"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="com.tiltus.bevywizard.project.TiltProjectInspection"/>
+        <localInspection groupName="TiltUI" displayName="TiltUI template bindings" shortName="TiltBindingValidation"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="com.tiltus.bevywizard.template.TiltBindingInspection"/>
+        <completion.contributor language="HTML" implementationClass="com.tiltus.bevywizard.template.TiltCompletionContributor"/>
+        <completion.contributor language="XML" implementationClass="com.tiltus.bevywizard.template.TiltCompletionContributor"/>
+        <completion.contributor language="JavaScript" implementationClass="com.tiltus.bevywizard.template.TiltCompletionContributor"/>
+        <completion.contributor language="CSS" implementationClass="com.tiltus.bevywizard.template.TiltCssCompletionContributor"/>
+        <completion.contributor language="HTML" implementationClass="com.tiltus.bevywizard.template.TiltAssetCompletionContributor"/>
+        <completion.contributor language="XML" implementationClass="com.tiltus.bevywizard.template.TiltAssetCompletionContributor"/>
+        <completion.contributor language="CSS" implementationClass="com.tiltus.bevywizard.template.TiltAssetCompletionContributor"/>
+        <completion.contributor language="Rust" implementationClass="com.tiltus.bevywizard.template.TiltAssetCompletionContributor"/>
+        <lang.documentationProvider language="CSS" implementationClass="com.tiltus.bevywizard.template.TiltCssDocumentationProvider"/>
+        <localInspection groupName="TiltUI" displayName="TiltUI CSS values" shortName="TiltCssValues"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="com.tiltus.bevywizard.template.TiltCssInspection"/>
+        <localInspection groupName="TiltUI" displayName="TiltUI asset paths" shortName="TiltAssetPaths"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="com.tiltus.bevywizard.template.TiltAssetPathInspection"/>
+        <psi.referenceContributor language="HTML" implementation="com.tiltus.bevywizard.template.TiltAssetReferenceContributor"/>
+        <psi.referenceContributor language="XML" implementation="com.tiltus.bevywizard.template.TiltAssetReferenceContributor"/>
+        <psi.referenceContributor language="CSS" implementation="com.tiltus.bevywizard.template.TiltAssetReferenceContributor"/>
+        <psi.referenceContributor language="Rust" implementation="com.tiltus.bevywizard.template.TiltAssetReferenceContributor"/>
+        <psi.referenceContributor language="HTML" implementation="com.tiltus.bevywizard.template.TiltComponentUsageReferences"/>
+        <psi.referenceContributor language="XML" implementation="com.tiltus.bevywizard.template.TiltComponentUsageReferences"/>
+        <psi.referenceContributor language="Rust" implementation="com.tiltus.bevywizard.template.TiltComponentUsageReferences"/>
+        <psi.referenceContributor language="HTML" implementation="com.tiltus.bevywizard.template.TiltReferenceContributor"/>
+        <psi.referenceContributor language="XML" implementation="com.tiltus.bevywizard.template.TiltReferenceContributor"/>
+        <psi.referenceContributor language="JavaScript" implementation="com.tiltus.bevywizard.template.TiltReferenceContributor"/>
+        <annotator language="HTML" implementationClass="com.tiltus.bevywizard.template.TiltTemplateAnnotator"/>
+        <annotator language="XML" implementationClass="com.tiltus.bevywizard.template.TiltTemplateAnnotator"/>
+        <annotator language="JavaScript" implementationClass="com.tiltus.bevywizard.template.TiltTemplateAnnotator"/>
+        <xml.elementDescriptorProvider implementation="com.tiltus.bevywizard.template.TiltComponentTags"/>
+        <highlightInfoFilter implementation="com.tiltus.bevywizard.template.TiltHtmlHighlightFilter"/>
+        <lang.inspectionSuppressor language="JavaScript" implementationClass="com.tiltus.bevywizard.template.TiltJsInspectionSuppressor"/>
+        <lang.documentationProvider language="HTML" implementationClass="com.tiltus.bevywizard.template.TiltDocumentationProvider"/>
+        <lang.documentationProvider language="XML" implementationClass="com.tiltus.bevywizard.template.TiltDocumentationProvider"/>
+        <lang.documentationProvider language="JavaScript" implementationClass="com.tiltus.bevywizard.template.TiltDocumentationProvider"/>
+        <referencesSearch implementation="com.tiltus.bevywizard.template.TiltReferencesSearch"/>
+        <referencesSearch implementation="com.tiltus.bevywizard.template.TiltComponentUsageSearch"/>
+        <referencesSearch implementation="com.tiltus.bevywizard.template.TiltAssetReferencesSearch"/>
+        <renamePsiElementProcessor implementation="com.tiltus.bevywizard.template.TiltComponentRenameProcessor"
+                                   order="first, before rsRenameProcessor"/>
+        <gotoDeclarationHandler implementation="com.tiltus.bevywizard.template.TiltGotoDeclarationHandler"/>
+        <toolWindow id="Tilt UI Icons" anchor="right" icon="/icons/tilt-ui-toolwindow.svg"
+                    factoryClass="com.tiltus.bevywizard.icons.IconCatalogToolWindowFactory"/>
+        <postStartupActivity implementation="com.tiltus.bevywizard.icons.IconCatalogAvailability"/>
+    </extensions>
+    <actions>
+        <action id="com.tiltus.bevywizard.NewTiltComponent"
+                class="com.tiltus.bevywizard.component.NewTiltComponentAction"
+                text="Tilt Component" description="Create a TiltUI component">
+            <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
